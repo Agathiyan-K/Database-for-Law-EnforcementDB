@@ -1,0 +1,115 @@
+-- Create the database
+CREATE DATABASE LawEnforcementDB;
+USE LawEnforcementDB;
+
+-- Step 1: Create the Department table
+CREATE TABLE Department (
+    Department_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Department_Name VARCHAR(100) UNIQUE NOT NULL,
+    Location VARCHAR(100) NOT NULL
+);
+
+-- Step 2: Create the Officers table without foreign keys initially
+CREATE TABLE Officers (
+    Officer_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    `Rank` VARCHAR(50) NOT NULL,
+    Department_ID INT
+);
+
+-- Step 3: Create the Station table without foreign keys initially
+CREATE TABLE Station (
+    Station_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Location VARCHAR(100) NOT NULL,
+    Station_Head INT UNIQUE
+);
+
+-- Step 4: Create the Criminals table without foreign keys initially
+CREATE TABLE Criminals (
+    Criminal_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Age INT NOT NULL,
+    Address VARCHAR(200) NOT NULL,
+    Department_ID INT,
+    Criminal_Record TEXT
+);
+
+-- Step 5: Create the Cases table without foreign keys initially
+CREATE TABLE Cases (
+    Case_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Crime_Type VARCHAR(100) NOT NULL,
+    Date DATE NOT NULL,
+    Status VARCHAR(50) NOT NULL,
+    Officer_in_Charge INT,
+    Station_ID INT
+);
+
+-- Step 6: Create the Evidence table without foreign keys initially
+CREATE TABLE Evidence (
+    Evidence_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Case_ID INT,
+    Description TEXT NOT NULL,
+    Collected_By INT
+);
+
+-- Now, add the foreign keys using ALTER TABLE
+
+-- Step 7: Add foreign keys to the Officers table
+ALTER TABLE Officers
+ADD CONSTRAINT fk_officers_department
+FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID);
+
+-- Step 8: Add foreign keys to the Station table
+ALTER TABLE Station
+ADD CONSTRAINT fk_station_head
+FOREIGN KEY (Station_Head) REFERENCES Officers(Officer_ID);
+
+-- Step 9: Add foreign keys to the Criminals table
+ALTER TABLE Criminals
+ADD CONSTRAINT fk_criminals_department
+FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID);
+
+-- Step 10: Add foreign keys to the Cases table
+ALTER TABLE Cases
+ADD CONSTRAINT fk_cases_officer
+FOREIGN KEY (Officer_in_Charge) REFERENCES Officers(Officer_ID),
+ADD CONSTRAINT fk_cases_station
+FOREIGN KEY (Station_ID) REFERENCES Station(Station_ID);
+
+-- Step 11: Add foreign keys to the Evidence table
+ALTER TABLE Evidence
+ADD CONSTRAINT fk_evidence_case
+FOREIGN KEY (Case_ID) REFERENCES Cases(Case_ID),
+ADD CONSTRAINT fk_evidence_officer
+FOREIGN KEY (Collected_By) REFERENCES Officers(Officer_ID);
+
+-- Granting Permissions to different roles
+
+-- Grant permissions to a user who manages departments
+CREATE USER 'department_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Department TO 'department_manager'@'localhost';
+
+-- Grant permissions to a user who manages stations
+CREATE USER 'station_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Station TO 'station_manager'@'localhost';
+
+-- Grant permissions to a user who manages officers
+CREATE USER 'officer_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Officers TO 'officer_manager'@'localhost';
+
+-- Grant permissions to a user who manages criminals
+CREATE USER 'criminal_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Criminals TO 'criminal_manager'@'localhost';
+
+-- Grant permissions to a user who manages cases
+CREATE USER 'case_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Cases TO 'case_manager'@'localhost';
+
+-- Grant permissions to a user who manages evidence
+CREATE USER 'evidence_manager'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON LawEnforcementDB.Evidence TO 'evidence_manager'@'localhost';
+
+-- Apply changes
+FLUSH PRIVILEGES;
+
